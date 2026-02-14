@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Open Desktop
+GenericName=Open Desktop Local
+Exec=xdg-open localhost:8502
+Terminal=false
+Icon=docker-open-notebook
+Categories=Development;ArtificialIntelligence;
+StartupNotify=true
