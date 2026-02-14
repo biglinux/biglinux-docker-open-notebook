@@ -39,9 +39,9 @@ pre_upgrade() {
   fi
 }
 
-# post_upgrade() {
-  # do something here
-# }
+post_upgrade() {
+  post_install
+}
 
 pre_remove() {
   # Down container
