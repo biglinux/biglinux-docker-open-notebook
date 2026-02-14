@@ -1,12 +1,24 @@
+
+currentUser=$(who | awk 'NR==1{print $1}')
+
 ## arg 1:  the new package version
 #pre_install() {
 	# do something here
 #}
 
 ## arg 1:  the new package version
-#post_install() {
-    # do something here
-#}
+post_install() {
+  # Check if the Docker folder exists, otherwise create it
+  if [ ! -d "/home/$currentUser/Docker/open-notebook" ]; then
+    cp -r '/etc/docker-biglinux/open-notebook/' "/home/$currentUser/Docker/"
+    sed -i "s/SURREAL_USER=.*/SURREAL_USER=$currentUser/" "/home/$currentUser/Docker/open-notebook/.env"
+    sed -i "s/SURREAL_PASSWORD=.*/SURREAL_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 32)/" "/home/$currentUser/Docker/open-notebook/.env"
+    chown "$currentUser:$currentUser" -R "/home/$currentUser/Docker/open-notebook/"
+  fi
+
+  # Start container
+  docker compose -f "/home/$currentUser/Docker/open-notebook/docker-compose.yml" up -d
+}
 
 ## arg 2:  the old package version
 #pre_upgrade() {
@@ -14,17 +26,24 @@
 #}
 
 ## arg 2:  the old package version
-#post_upgrade() {
-	#post_install
-#}
+post_upgrade() {
+  if [ -e "/home/$currentUser/Docker/open-notebook/docker-compose.yml" ] ;then
+    docker compose -f "/home/$currentUser/Docker/open-notebook/docker-compose.yml" down
+    cp "/home/$currentUser/Docker/open-notebook/docker-compose.yml" "/home/$currentUser/Docker/open-notebook/docker-compose.yml.bkp"
+    cp '/etc/docker-biglinux/open-notebook/docker-compose.yml' "/home/$currentUser/Docker/open-notebook/docker-compose.yml"
+    docker compose -f "/home/$currentUser/Docker/open-notebook/docker-compose.yml" up -d
+  fi
+}
 
 ## arg 1:  the old package version
-#pre_remove() {
-	# do something here
-#}
+pre_remove() {
+  docker compose -f "/home/$currentUser/Docker/open-notebook/docker-compose.yml" down
+}
 
 ## arg 1:  the old package version
-#post_remove() {
-	# do something here
-#}
- 
+post_remove() {
+  for image in $(grep 'image:' "/home/$currentUser/Docker/open-notebook/docker-compose.yml" | awk '{print $2}'); do
+    docker rmi $image
+  done
+}
+
