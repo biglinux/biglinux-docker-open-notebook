@@ -34,7 +34,7 @@ pre_upgrade() {
   fi
   # Backup compose file and up new containers
   if [ -e "$workDir/docker-compose.yml" ] ;then
-    cp "$workDir/docker-compose.yml" "$workDir/docker-compose.yml.bkp"
+    cp "$workDir/docker-compose.yml" "$workDir/docker-compose.yml.$(date +%Y-%m-%d)-bkp"
     cp '/etc/docker-biglinux/open-notebook/docker-compose.yml' "$workDir/docker-compose.yml"
   fi
 }
