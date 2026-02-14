@@ -10,13 +10,9 @@ maxTimeout=60
 
 # up docker composer
 if [ -z "$(docker compose ls | grep "$composeFile" | grep running)" ]; then
-#   zenityTitle=$"Starting Open-notebook"
-#   zenityText=$"Starting Open-notebook, Please wait..."
-#   docker compose -f "$HOME/Docker/open-notebook/docker-compose.yml" up -d | zenity --progress --title="$zenityTitle" --text="$zenityText" --pulsate --auto-close --no-cancel
-
   # named pipe for Zenity communication
   pipePath="/tmp/openNotebook_pipe_$$"
-  mkfifo "$pipePath"                       # pipe must be created *before* Zenity starts
+  mkfifo "$pipePath"
 
   # “Pulsate” progress box (auto‑close when pipe is removed)
   zenityStartTitle=$"Starting Open-notebook"
