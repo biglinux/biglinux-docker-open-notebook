@@ -1,54 +1,62 @@
 
+# Discover current user and set workDir
 currentUser=$(who | awk 'NR==1{print $1}')
+workDir="/home/$currentUser/Docker/open-notebook"
 
-## arg 1:  the new package version
+
 #pre_install() {
-	# do something here
+  # do something here
 #}
 
-## arg 1:  the new package version
 post_install() {
   # Check if the Docker folder exists, otherwise create it
-  if [ ! -d "/home/$currentUser/Docker/open-notebook" ]; then
+  if [ ! -d "$workDir" ]; then
     cp -r '/etc/docker-biglinux/open-notebook/' "/home/$currentUser/Docker/"
-    sed -i "s/SURREAL_USER=.*/SURREAL_USER=$currentUser/" "/home/$currentUser/Docker/open-notebook/.env"
-    sed -i "s/SURREAL_PASSWORD=.*/SURREAL_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 32)/" "/home/$currentUser/Docker/open-notebook/.env"
-    chown "$currentUser:$currentUser" -R "/home/$currentUser/Docker/open-notebook/"
+    sed -i "s/SURREAL_USER=.*/SURREAL_USER=$currentUser/" "$workDir/.env"
+    sed -i "s/SURREAL_PASSWORD=.*/SURREAL_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 32)/" "$workDir/.env"
+    chown "$currentUser:$currentUser" -R "$workDir/"
   fi
 
   # Pull images
-  for image in $(grep 'image:' "/home/$currentUser/Docker/open-notebook/docker-compose.yml" | awk '{print $2}'); do
+  for image in $(grep 'image:' "$workDir/docker-compose.yml" | awk '{print $2}'); do
     echo "Please wait, this step takes time."
     docker pull $image 1>/dev/null
   done
 
   # Start container
-  docker compose -f "/home/$currentUser/Docker/open-notebook/docker-compose.yml" up -d
+  docker compose -f "$workDir/docker-compose.yml" up -d
 }
 
-## arg 2:  the old package version
-#pre_upgrade() {
-	# do something here
-#}
-
-## arg 2:  the old package version
-post_upgrade() {
-  if [ -e "/home/$currentUser/Docker/open-notebook/docker-compose.yml" ] ;then
-    docker compose -f "/home/$currentUser/Docker/open-notebook/docker-compose.yml" down
-    cp "/home/$currentUser/Docker/open-notebook/docker-compose.yml" "/home/$currentUser/Docker/open-notebook/docker-compose.yml.bkp"
-    cp '/etc/docker-biglinux/open-notebook/docker-compose.yml' "/home/$currentUser/Docker/open-notebook/docker-compose.yml"
-    docker compose -f "/home/$currentUser/Docker/open-notebook/docker-compose.yml" up -d
+pre_upgrade() {
+  # Down container
+  if [ -e "$workDir/docker-compose.yml" ] ;then
+    docker compose -f "$workDir/docker-compose.yml" down
   fi
 }
 
-## arg 1:  the old package version
-pre_remove() {
-  docker compose -f "/home/$currentUser/Docker/open-notebook/docker-compose.yml" down
+post_upgrade() {
+  # Pull new images
+  for image in $(grep 'image:' "$workDir/docker-compose.yml" | awk '{print $2}'); do
+    echo "Please wait, this step takes time."
+    docker pull $image 1>/dev/null
+  done
+  # Backup compose file and up new containers
+  if [ -e "$workDir/docker-compose.yml" ] ;then
+    cp "$workDir/docker-compose.yml" "$workDir/docker-compose.yml.bkp"
+    cp '/etc/docker-biglinux/open-notebook/docker-compose.yml' "$workDir/docker-compose.yml"
+  fi
+  # Start container
+  docker compose -f "$workDir/docker-compose.yml" up -d
 }
 
-## arg 1:  the old package version
+pre_remove() {
+  # Down container
+  docker compose -f "$workDir/docker-compose.yml" down
+}
+
 post_remove() {
-  for image in $(grep 'image:' "/home/$currentUser/Docker/open-notebook/docker-compose.yml" | awk '{print $2}'); do
+  # Erase docker images
+  for image in $(grep 'image:' "$workDir/docker-compose.yml" | awk '{print $2}'); do
     docker rmi $image
   done
 }

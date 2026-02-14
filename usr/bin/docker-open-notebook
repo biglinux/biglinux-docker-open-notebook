@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # up docker composer
-docker compose -f "$HOME/Docker/open-notebook/docker-compose.yml" up -d
+if [ -z "$(docker compose ls | grep "$HOME/Docker/open-notebook/docker-compose.yml" | grep running)" ]; then
+  docker compose -f "$HOME/Docker/open-notebook/docker-compose.yml" up -d
+fi
 
 # open in terminal
 xdg-open localhost:8502
