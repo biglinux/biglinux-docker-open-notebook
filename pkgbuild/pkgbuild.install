@@ -32,22 +32,16 @@ pre_upgrade() {
   if [ -e "$workDir/docker-compose.yml" ] ;then
     docker compose -f "$workDir/docker-compose.yml" down
   fi
-}
-
-post_upgrade() {
-  # Pull new images
-  for image in $(grep 'image:' "$workDir/docker-compose.yml" | awk '{print $2}'); do
-    echo "Please wait, this step takes time."
-    docker pull $image 1>/dev/null
-  done
   # Backup compose file and up new containers
   if [ -e "$workDir/docker-compose.yml" ] ;then
     cp "$workDir/docker-compose.yml" "$workDir/docker-compose.yml.bkp"
     cp '/etc/docker-biglinux/open-notebook/docker-compose.yml' "$workDir/docker-compose.yml"
   fi
-  # Start container
-  docker compose -f "$workDir/docker-compose.yml" up -d
 }
+
+# post_upgrade() {
+  # do something here
+# }
 
 pre_remove() {
   # Down container
