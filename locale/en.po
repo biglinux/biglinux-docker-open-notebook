@@ -19,3 +19,13 @@ msgstr "Starting Open-notebook"
 
 msgid "Starting Open-notebook, Please wait..."
 msgstr "Starting Open-notebook, Please wait..."
+
+msgid "Error to open Open-notebook"
+msgstr "Error to open Open-notebook"
+
+msgid ""
+"Timeout: Open‑notebook not reachable after $timeoutSec seconds.\\nCheck out "
+"Docker Composer."
+msgstr ""
+"Timeout: Open‑notebook not reachable after $timeoutSec seconds.\\nCheck out "
+"Docker Composer."

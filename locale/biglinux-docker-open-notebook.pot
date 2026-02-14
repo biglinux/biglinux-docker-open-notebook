@@ -11,11 +11,18 @@ msgstr  "Project-Id-Version: biglinux-docker-open-notebook\n"
         "Language-Team: LANGUAGE <LL@li.org>\n"
         "Language: \n"
         "MIME-Version: 1.0\n"
-        "Content-Type: text/plain; charset=CHARSET\n"
+        "Content-Type: text/plain; charset=UTF-8\n"
         "Content-Transfer-Encoding: 8bit\n"
 
 msgid   "Starting Open-notebook"
 msgstr  ""
 
 msgid   "Starting Open-notebook, Please wait..."
+msgstr  ""
+
+msgid   "Error to open Open-notebook"
+msgstr  ""
+
+msgid   "Timeout: Open‑notebook not reachable after $timeoutSec seconds."
+        "\\nCheck out Docker Composer."
 msgstr  ""
