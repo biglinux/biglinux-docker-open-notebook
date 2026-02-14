@@ -54,4 +54,3 @@ post_remove() {
     docker rmi $image
   done
 }
-
