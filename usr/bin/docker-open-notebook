@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# up docker composer
+docker compose -f "$HOME/Docker/open-notebook/docker-compose.yml" up -d
+
+# open in terminal
+xdg-open localhost:8502
