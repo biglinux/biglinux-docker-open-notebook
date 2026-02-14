@@ -1,8 +1,14 @@
 #!/bin/bash
 
+#Translation
+export TEXTDOMAINDIR="/usr/share/locale"
+export TEXTDOMAIN=docker-open-notebook
+
 # up docker composer
 if [ -z "$(docker compose ls | grep "$HOME/Docker/open-notebook/docker-compose.yml" | grep running)" ]; then
-  docker compose -f "$HOME/Docker/open-notebook/docker-compose.yml" up -d
+  zenityTitle=$"Starting Open-notebook"
+  zenityText=$"Starting Open-notebook, Please wait..."
+  docker compose -f "$HOME/Docker/open-notebook/docker-compose.yml" up -d | zenity --progress --title="$zenityTitle" --text="$zenityText" --pulsate --auto-close --no-cancel
 fi
 
 # open in terminal
