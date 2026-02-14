@@ -5,49 +5,48 @@ export TEXTDOMAINDIR="/usr/share/locale"
 export TEXTDOMAIN=biglinux-docker-open-notebook
 
 composeFile="$HOME/Docker/open-notebook/docker-compose.yml"
-url="http://localhost:8502/notebooks"
-timeoutSec=60
+checkUrl="http://localhost:8502/notebooks"
+maxTimeout=60
 
 # up docker composer
-if [ -z "$(docker compose ls | grep "$HOME/Docker/open-notebook/docker-compose.yml" | grep running)" ]; then
+if [ -z "$(docker compose ls | grep "$composeFile" | grep running)" ]; then
 #   zenityTitle=$"Starting Open-notebook"
 #   zenityText=$"Starting Open-notebook, Please wait..."
 #   docker compose -f "$HOME/Docker/open-notebook/docker-compose.yml" up -d | zenity --progress --title="$zenityTitle" --text="$zenityText" --pulsate --auto-close --no-cancel
 
-  # up docker compose
-  docker compose -f "$composeFile" up -d
+  # named pipe for Zenity communication
+  pipePath="/tmp/openNotebook_pipe_$$"
+  mkfifo "$pipePath"                       # pipe must be created *before* Zenity starts
 
-  # Start zenity
+  # “Pulsate” progress box (auto‑close when pipe is removed)
   zenityStartTitle=$"Starting Open-notebook"
   zenityStarText=$"Starting Open-notebook, Please wait..."
-  zenity --progress \
-    --title="$zenityStartTitle" \
-    --text="$zenityStarText" \
-    --pulsate --auto-close --no-cancel &
-    zenityPid=$!
+  zenity --progress --title="$zenityStartTitle" --text="$zenityStarText" --pulsate --auto-close --no-cancel < "$pipePath" &
 
-  # wait for open-notebook to be ready
+  # copose up and wait for open-notebook to be ready
+  composeUp() {
+  docker compose -f "$composeFile" up -d &
   elapsed=0
-  while (( elapsed < timeoutSec )); do
-    httpCode=$(curl -s -o /dev/null -w "%{http_code}" "$url")
-    if [[ "$httpCode" -eq 200 ]]; then
-      # OK – fecha a janela
-      kill "$zenityPid" 2>/dev/null
-      break
-    fi
-    sleep 1
-    elapsed=$((elapsed + 1))
+  while (( elapsed < maxTimeout )); do
+      httpCode=$(curl -s -o /dev/null -w "%{http_code}" "$checkUrl")
+      if [[ "$httpCode" -eq 200 ]]; then
+          break
+      fi
+      sleep 1
+      elapsed=$((elapsed + 1))
   done
+  }
+  composeUp > "$pipePath"
+
+  # Cleans up the pipe
+  rm -f "$pipePath"
 
   # zenity error after 60 seconds
-  if (( elapsed >= timeoutSec )); then
-    zenityErrorTitle=$"Error to open Open-notebook"
-    zenityErrorText=$"Timeout: Open‑notebook not reachable after $timeoutSec seconds.\nCheck out Docker Composer."
-    kill "$zenityPid" 2>/dev/null
-    zenity --error \
-      --title="$zenityErrorTitle" \
-      --text="$zenityErrorText"
-    exit 1
+  if (( elapsed >= maxTimeout )); then
+      zenityErrorTitle=$"Error to open Open-notebook"
+      zenityErrorText=$"Timeout: Open‑notebook not reachable after $timeoutSec seconds.\nCheck out Docker Composer."
+      zenity --error --title="$zenityErrorTitle" --text="$zenityErrorText"
+      exit 1
   fi
 fi
 
