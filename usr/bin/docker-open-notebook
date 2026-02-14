@@ -2,7 +2,7 @@
 
 #Translation
 export TEXTDOMAINDIR="/usr/share/locale"
-export TEXTDOMAIN=docker-open-notebook
+export TEXTDOMAIN=biglinux-docker-open-notebook
 
 # up docker composer
 if [ -z "$(docker compose ls | grep "$HOME/Docker/open-notebook/docker-compose.yml" | grep running)" ]; then
