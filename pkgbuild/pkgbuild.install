@@ -16,6 +16,12 @@ post_install() {
     chown "$currentUser:$currentUser" -R "/home/$currentUser/Docker/open-notebook/"
   fi
 
+  # Pull images
+  for image in $(grep 'image:' "/home/$currentUser/Docker/open-notebook/docker-compose.yml" | awk '{print $2}'); do
+    echo "Please wait, this step takes time."
+    docker pull $image 1>/dev/null
+  done
+
   # Start container
   docker compose -f "/home/$currentUser/Docker/open-notebook/docker-compose.yml" up -d
 }
