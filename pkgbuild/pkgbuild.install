@@ -23,8 +23,8 @@ post_install() {
     docker pull $image 1>/dev/null
   done
 
-  # Start container
-  docker compose -f "$workDir/docker-compose.yml" up -d
+  ## Start container
+  # docker compose -f "$workDir/docker-compose.yml" up -d
 }
 
 pre_upgrade() {

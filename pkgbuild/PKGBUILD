@@ -2,7 +2,7 @@
 
 pkgname=biglinux-docker-open-notebook
 pkgdesc="An open source, privacy-focused alternative to Google's Notebook LM! Join our Discord server for help, to share workflow ideas, and suggest features!"
-depends=('biglinux-docker-config')
+depends=('biglinux-docker-config' 'zenity' 'curl')
 # makedepends=('')
 # conflicts=('')
 pkgver=$(date +%y.%m.%d)
